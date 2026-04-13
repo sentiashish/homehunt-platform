@@ -1,0 +1,328 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Apple/Airbnb Premium Colors */
+  --white: #FFFFFF;
+  --black: #000000;
+  --gray-50: #FAFAFA;
+  --gray-100: #F5F5F5;
+  --gray-200: #EEEEEE;
+  --gray-300: #E0E0E0;
+  --gray-400: #BDBDBD;
+  --gray-500: #9E9E9E;
+  --gray-600: #757575;
+  --gray-700: #616161;
+  --gray-800: #424242;
+  --gray-900: #212121;
+  
+  /* Accent - Gold Elegance */
+  --accent-gold: #D4AF37;
+  --accent-gold-light: #E5D0A5;
+
+  /* Light Mode */
+  --background: #FFFFFF;
+  --foreground: #000000;
+  --card: #FAFAFA;
+  --card-foreground: #000000;
+  --popover: #FFFFFF;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F5F5;
+  --secondary-foreground: #000000;
+  --muted: #EEEEEE;
+  --muted-foreground: #757575;
+  --accent: #D4AF37;
+  --accent-foreground: #000000;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #EEEEEE;
+  --input: #F5F5F5;
+  --ring: #000000;
+  --radius: 0.75rem;
+  
+  /* Font Families */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  --font-serif: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  --font-mono: 'Monaco', 'Courier New', monospace;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: #1A1A1A;
+  --card-foreground: #FFFFFF;
+  --popover: #1A1A1A;
+  --popover-foreground: #FFFFFF;
+  --primary: #FFFFFF;
+  --primary-foreground: #000000;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #FFFFFF;
+  --muted: #424242;
+  --muted-foreground: #BDBDBD;
+  --accent: #D4AF37;
+  --accent-foreground: #000000;
+  --destructive: #FF6B6B;
+  --destructive-foreground: #FFFFFF;
+  --border: #333333;
+  --input: #2A2A2A;
+  --ring: #FFFFFF;
+}
+
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    @apply bg-background scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Typography Hierarchy - Apple/Airbnb Style */
+  h1 {
+    @apply font-sans text-5xl md:text-6xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply font-sans text-4xl md:text-5xl font-bold tracking-tight;
+  }
+
+  h3 {
+    @apply font-sans text-3xl md:text-4xl font-bold tracking-normal;
+  }
+
+  h4 {
+    @apply font-sans text-2xl font-semibold tracking-normal;
+  }
+
+  h5 {
+    @apply font-sans text-xl font-semibold;
+  }
+
+  h6 {
+    @apply font-sans text-lg font-semibold;
+  }
+
+  p {
+    @apply font-sans text-base md:text-lg leading-relaxed text-foreground/90;
+  }
+
+  a {
+    @apply text-accent hover:text-accent/70 transition-colors;
+  }
+
+  /* Card Elevation */
+  .card-elevation {
+    @apply shadow-sm hover:shadow-lg transition-shadow duration-300;
+  }
+
+  /* Premium Image Container */
+  .image-container {
+    @apply rounded-2xl overflow-hidden bg-secondary;
+  }
+
+  /* Smooth Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full hover:bg-muted-foreground;
+  }
+
+  /* Enhanced hover effects */
+  button {
+    @apply transition-all duration-300;
+  }
+
+  /* Link hover animations */
+  a {
+    @apply relative inline-block;
+  }
+
+  a::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300;
+  }
+
+  a:hover::after {
+    @apply w-full;
+  }
+
+  /* Card elevation on hover */
+  .elevation-card {
+    @apply transition-all duration-300 hover:shadow-2xl;
+  }
+
+  /* Gradient text animation */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Netflix-style hover scale */
+  .netflix-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Smooth blur effect */
+  .blur-image {
+    @apply backdrop-blur-sm;
+  }
+
+  /* Smooth page transitions */
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Floating animation for decorative elements */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Glow effect for accent elements */
+  .glow-accent {
+    @apply shadow-lg shadow-accent/20;
+  }
+
+  /* Smooth transitions for background changes */
+  .smooth-transition {
+    @apply transition-colors duration-300;
+  }
+
+  /* Typography improvements */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--luxury-gold), var(--luxury-gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Enhanced input styling */
+  input,
+  textarea,
+  select {
+    @apply transition-all duration-300;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply ring-2 ring-accent/50;
+  }
+
+  /* Backdrop blur enhancements */
+  .backdrop-blur-enhanced {
+    @apply backdrop-blur-xl bg-white/10 dark:bg-black/10 border border-white/20 dark:border-black/20;
+  }
+
+  /* Smooth transform animations */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  /* Color transition animation */
+  .color-transition {
+    @apply transition-colors duration-500;
+  }
+}
