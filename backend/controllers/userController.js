@@ -2,6 +2,12 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/
+
+function isStrongPassword(password) {
+  return PASSWORD_REGEX.test(password)
+}
+
 function signUserToken(user) {
   return jwt.sign(
     {
@@ -20,6 +26,13 @@ async function signupUser(req, res, next) {
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password are required' })
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({
+        message:
+          'Password must be 8-20 characters and include uppercase, lowercase, and number. Use letters and numbers only.',
+      })
     }
 
     const existing = await User.findOne({ email: email.toLowerCase() })

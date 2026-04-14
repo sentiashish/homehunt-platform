@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -16,12 +16,32 @@ export default function UserLoginPage() {
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const created = params.get('created')
+    const prefillEmail = params.get('email')
+
+    if (prefillEmail) {
+      setEmail(prefillEmail)
+    }
+
+    if (created === '1') {
+      toast.success('Account created. Please login with your credentials.')
+    }
+  }, [])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (!email.trim() || !password) {
+      toast.error('Please enter email and password')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
-      const payload = await loginUser(email, password)
+      const payload = await loginUser(email.trim().toLowerCase(), password)
       setUserSession(payload.token, payload.user)
       toast.success('Welcome back. Login successful.')
       router.push('/')

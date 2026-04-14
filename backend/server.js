@@ -6,7 +6,10 @@ const connectDB = require('./config/db')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const contentRoutes = require('./routes/contentRoutes')
+const propertyRoutes = require('./routes/propertyRoutes')
+const inquiryRoutes = require('./routes/inquiryRoutes')
 const { ensureDefaultContent } = require('./controllers/contentController')
+const { ensureDefaultProperties } = require('./controllers/propertyController')
 const { notFound, errorHandler } = require('./middleware/errorMiddleware')
 
 dotenv.config()
@@ -29,6 +32,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/content', contentRoutes)
+app.use('/api/properties', propertyRoutes)
+app.use('/api/inquiries', inquiryRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
@@ -37,6 +42,7 @@ async function start() {
   try {
     await connectDB()
     await ensureDefaultContent()
+    await ensureDefaultProperties()
 
     app.listen(port, () => {
       console.log(`Backend server running on port ${port}`)

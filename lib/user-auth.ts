@@ -12,11 +12,17 @@ function hasWindow() {
   return typeof window !== 'undefined'
 }
 
+function emitAuthChange() {
+  if (!hasWindow()) return
+  window.dispatchEvent(new Event('user-auth-changed'))
+}
+
 export function setUserSession(token: string, user: AuthUser) {
   if (!hasWindow()) return
 
   localStorage.setItem(USER_TOKEN_KEY, token)
   localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(user))
+  emitAuthChange()
 }
 
 export function getUserToken(): string | null {
@@ -43,6 +49,7 @@ export function clearUserSession() {
 
   localStorage.removeItem(USER_TOKEN_KEY)
   localStorage.removeItem(USER_PROFILE_KEY)
+  emitAuthChange()
 }
 
 export function isUserLoggedIn(): boolean {

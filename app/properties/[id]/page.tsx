@@ -1,15 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCarousel from '@/components/PropertyCarousel'
-import PropertyCard from '@/components/PropertyCard'
 import { properties } from '@/lib/properties'
 import { motion } from 'framer-motion'
-import { Download, Phone, Mail, MapPin, Bed, Maximize2, Calendar, ChevronLeft } from 'lucide-react'
+import { Download, Phone, Mail, MapPin, Bed, Maximize2, Calendar, ChevronLeft, Heart } from 'lucide-react'
 import Link from 'next/link'
 import { formatINR } from '@/lib/currency'
+import { getUserToken } from '@/lib/user-auth'
+import AuthActionModal from '@/components/AuthActionModal'
+import InquiryModal from '@/components/InquiryModal'
+import { saveProperty } from '@/lib/wishlist'
+import { toast } from 'sonner'
+import { fetchProperties } from '@/lib/property-api'
 
 interface PropertyDetailsPageProps {
   params: {
@@ -18,16 +23,36 @@ interface PropertyDetailsPageProps {
 }
 
 export default function PropertyDetailsPage({ params }: PropertyDetailsPageProps) {
-  const property = properties.find((p) => p.id === params.id)
-  const [showInquiryForm, setShowInquiryForm] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  })
+  const [propertyList, setPropertyList] = useState(properties)
+  const property = propertyList.find((p) => p.id === params.id)
+  const [showInquiryModal, setShowInquiryModal] = useState(false)
+  const [authOpen, setAuthOpen] = useState(false)
+  const pendingActionRef = useRef<null | (() => void)>(null)
 
-  const similarProperties = properties.filter(
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadProperties() {
+      try {
+        const payload = await fetchProperties()
+        if (isMounted) {
+          setPropertyList(payload)
+        }
+      } catch {
+        if (isMounted) {
+          setPropertyList(properties)
+        }
+      }
+    }
+
+    loadProperties()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const similarProperties = propertyList.filter(
     (p) => p.id !== params.id && p.location === property?.location
   )
 
@@ -48,17 +73,25 @@ export default function PropertyDetailsPage({ params }: PropertyDetailsPageProps
     )
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const runProtectedAction = (action: () => void) => {
+    if (!getUserToken()) {
+      pendingActionRef.current = action
+      setAuthOpen(true)
+      return
+    }
+
+    action()
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log('Form submitted:', formData)
-    setFormData({ name: '', email: '', phone: '', message: '' })
-    setShowInquiryForm(false)
+  const handleSave = () => {
+    const result = saveProperty(property.id)
+
+    if (result.added) {
+      toast.success('Property saved to your account')
+      return
+    }
+
+    toast.message('Property already saved')
   }
 
   return (
@@ -139,7 +172,16 @@ export default function PropertyDetailsPage({ params }: PropertyDetailsPageProps
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="mb-8 pb-8 border-b border-border"
               >
-                <p className="text-accent font-bold text-4xl">{formatINR(property.price)}</p>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-accent font-bold text-4xl">{formatINR(property.price)}</p>
+                  <button
+                    onClick={() => runProtectedAction(handleSave)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Save Property
+                  </button>
+                </div>
               </motion.div>
 
               {/* Quick Info */}
@@ -213,107 +255,46 @@ export default function PropertyDetailsPage({ params }: PropertyDetailsPageProps
               <div className="bg-card rounded-xl p-8 shadow-md sticky top-32">
                 <h3 className="font-serif text-2xl font-bold mb-6">Ready to Inquire?</h3>
 
-                {!showInquiryForm ? (
-                  <div className="space-y-4">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowInquiryForm(true)}
-                      className="w-full px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-opacity-90 transition-all"
-                    >
-                      Send Inquiry
-                    </motion.button>
-
-                    <motion.a
-                      href={`tel:+919876543210`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
-                    >
-                      <Phone className="w-5 h-5 mr-2" />
-                      Call Now
-                    </motion.a>
-
-                    <motion.a
-                      href="mailto:sales@megaplexprime.in"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
-                    >
-                      <Mail className="w-5 h-5 mr-2" />
-                      Email Agent
-                    </motion.a>
-
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Download Brochure
-                    </motion.button>
-                  </div>
-                ) : (
-                  <motion.form
-                    onSubmit={handleSubmit}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
+                <div className="space-y-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowInquiryModal(true)}
+                    className="w-full px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-opacity-90 transition-all"
                   >
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Your Name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Your Email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-                    />
-                    <input
-                      type="tel"
-                      name="phone"
-                      placeholder="Your Phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-                    />
-                    <textarea
-                      name="message"
-                      placeholder="Your Message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      type="submit"
-                      className="w-full px-6 py-2 bg-accent text-accent-foreground rounded-lg font-semibold hover:bg-opacity-90 transition-all"
-                    >
-                      Send Message
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      type="button"
-                      onClick={() => setShowInquiryForm(false)}
-                      className="w-full px-6 py-2 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
-                    >
-                      Cancel
-                    </motion.button>
-                  </motion.form>
-                )}
+                    Send Inquiry
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => { window.location.href = 'tel:+919876543210' }}
+                    className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
+                  >
+                    <Phone className="w-5 h-5 mr-2" />
+                    Call Now
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => { window.location.href = 'mailto:sales@megaplexprime.in' }}
+                    className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
+                  >
+                    <Mail className="w-5 h-5 mr-2" />
+                    Email Agent
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => toast.success('Brochure download started')}
+                    className="w-full flex items-center justify-center px-6 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition-all"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Download Brochure
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -334,6 +315,26 @@ export default function PropertyDetailsPage({ params }: PropertyDetailsPageProps
       )}
 
       <Footer />
+
+      <InquiryModal
+        open={showInquiryModal}
+        onClose={() => setShowInquiryModal(false)}
+        source="property-details"
+        propertyId={property.id}
+        propertyName={property.title}
+        heroImage={property.image}
+      />
+
+      <AuthActionModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onSuccess={() => {
+          if (pendingActionRef.current) {
+            pendingActionRef.current()
+            pendingActionRef.current = null
+          }
+        }}
+      />
     </main>
   )
 }

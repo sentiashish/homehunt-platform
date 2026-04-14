@@ -1,18 +1,20 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import PropertyCard from '@/components/PropertyCard'
 import FilterSidebar from '@/components/FilterSidebar'
 import HeroSection from '@/components/HeroSection'
 import { properties } from '@/lib/properties'
+import { fetchProperties } from '@/lib/property-api'
 import { motion } from 'framer-motion'
 import { LayoutGrid, LayoutList, Search } from 'lucide-react'
 
 export default function PropertiesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
+  const [allProperties, setAllProperties] = useState(properties)
   const [filters, setFilters] = useState({
     priceMin: 0,
     priceMax: 5000000,
@@ -20,9 +22,32 @@ export default function PropertiesPage() {
     propertyType: '',
   })
 
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadProperties() {
+      try {
+        const payload = await fetchProperties()
+        if (isMounted) {
+          setAllProperties(payload)
+        }
+      } catch {
+        if (isMounted) {
+          setAllProperties(properties)
+        }
+      }
+    }
+
+    loadProperties()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   // Filter properties based on search and filters
   const filteredProperties = useMemo(() => {
-    return properties.filter((property) => {
+    return allProperties.filter((property) => {
       const matchesSearch =
         property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         property.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -33,7 +58,7 @@ export default function PropertiesPage() {
 
       return matchesSearch && matchesPrice && matchesLocation
     })
-  }, [searchTerm, filters])
+  }, [allProperties, searchTerm, filters])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -54,12 +79,12 @@ export default function PropertiesPage() {
       <HeroSection
         title="Luxury Properties"
         subtitle="Browse our exclusive collection of premium properties"
-        backgroundImage="/placeholder.jpg"
+        backgroundImage="/properties/mansion-5.jpg"
         showScrollIndicator={false}
       />
 
       {/* Content */}
-      <section className="py-16">
+      <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar */}
@@ -95,7 +120,7 @@ export default function PropertiesPage() {
                 {/* View Toggle and Results Count */}
                 <div className="flex justify-between items-center">
                   <p className="text-muted-foreground">
-                    Showing {filteredProperties.length} of {properties.length} properties
+                    Showing {filteredProperties.length} of {allProperties.length} properties
                   </p>
                   <div className="flex gap-2">
                     <motion.button
@@ -131,7 +156,7 @@ export default function PropertiesPage() {
                 <motion.div
                   className={
                     viewMode === 'grid'
-                      ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
+                      ? 'grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-fr'
                       : 'space-y-6'
                   }
                   variants={containerVariants}
@@ -146,6 +171,7 @@ export default function PropertiesPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.3 }}
+                      className="h-full"
                     >
                       <PropertyCard property={property} />
                     </motion.div>

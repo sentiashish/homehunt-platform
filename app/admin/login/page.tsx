@@ -1,17 +1,21 @@
 'use client'
 
+import Link from 'next/link'
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { AlertCircle, LockKeyhole, ShieldCheck, Sparkles } from 'lucide-react'
 import { loginAdmin } from '@/lib/content-api'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('admin@gmail.com')
   const [password, setPassword] = useState('1234')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const signedOut = searchParams.get('signedOut') === '1'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -47,6 +51,12 @@ export default function AdminLoginPage() {
             <ShieldCheck className="w-3.5 h-3.5" />
             Enterprise Admin Access
           </div>
+
+          {signedOut && (
+            <div className="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              You have been signed out.
+            </div>
+          )}
 
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mt-4">Megaplex Prime Control</h1>
           <p className="text-muted-foreground mt-2 leading-relaxed">
@@ -95,6 +105,21 @@ export default function AdminLoginPage() {
             {isSubmitting ? 'Authenticating...' : 'Sign In to Dashboard'}
           </button>
         </form>
+
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-background/80 px-4 py-3 text-sm font-semibold hover:bg-muted transition-colors"
+          >
+            Back to Site
+          </Link>
+          <Link
+            href="/properties"
+            className="inline-flex items-center justify-center rounded-xl border border-border bg-background/80 px-4 py-3 text-sm font-semibold hover:bg-muted transition-colors"
+          >
+            View Properties
+          </Link>
+        </div>
 
         <div className="mt-6 pt-5 border-t border-border/80 text-xs text-muted-foreground flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5">

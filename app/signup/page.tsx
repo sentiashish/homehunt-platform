@@ -8,30 +8,35 @@ import { UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 import Navbar from '@/components/Navbar'
 import { signupUser } from '@/lib/user-api'
-import { setUserSession } from '@/lib/user-auth'
+import { isStrongPassword, PASSWORD_RULE_TEXT } from '@/lib/auth-validation'
 
 export default function UserSignupPage() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters')
+    if (!isStrongPassword(password)) {
+      toast.error(PASSWORD_RULE_TEXT)
+      return
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Password and confirm password must match')
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      const payload = await signupUser(name, email, password)
-      setUserSession(payload.token, payload.user)
-      toast.success('Account created successfully.')
-      router.push('/')
+      await signupUser(name.trim(), email.trim().toLowerCase(), password)
+      toast.success('Account created successfully. Please login to continue.')
+      router.push(`/login?created=1&email=${encodeURIComponent(email.trim().toLowerCase())}`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Signup failed')
     } finally {
@@ -80,9 +85,20 @@ export default function UserSignupPage() {
               <input
                 type="password"
                 required
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">{PASSWORD_RULE_TEXT}</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Confirm Password</label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>

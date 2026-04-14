@@ -23,7 +23,7 @@ export default function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
     propertyType: '',
   })
 
-  const locations = ['New York', 'Los Angeles', 'Miami', 'San Francisco', 'Chicago']
+  const locations = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata', 'Ahmedabad']
   const propertyTypes = ['Apartment', 'House', 'Condo', 'Penthouse', 'Villa']
 
   const handleFilterChange = (key: string, value: any) => {
@@ -126,6 +126,19 @@ export default function FilterSidebar({ onFilterChange }: FilterSidebarProps) {
             transition={{ duration: 0.3 }}
             className="space-y-2"
           >
+            <motion.button
+              type="button"
+              onClick={() => handleFilterChange('location', '')}
+              className={`w-full rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors ${
+                filters.location === ''
+                  ? 'border-accent bg-accent/10 text-accent'
+                  : 'border-border hover:bg-muted'
+              }`}
+              whileHover={{ x: 5 }}
+            >
+              All Locations
+            </motion.button>
+
             {locations.map((loc) => (
               <motion.label
                 key={loc}

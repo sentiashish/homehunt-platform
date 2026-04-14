@@ -47,7 +47,7 @@ export default function AdminLayout({
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken')
-    router.push('/admin/login')
+    router.replace('/admin/login?signedOut=1')
   }
 
   return (
