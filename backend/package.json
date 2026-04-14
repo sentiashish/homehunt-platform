@@ -1,10 +1,11 @@
 {
-  "name": "megaplex-prime-backend",
+  "name": "homehunt-backend",
   "version": "1.0.0",
-  "description": "Backend API for Megaplex Prime luxury real estate platform",
+  "description": "Backend API for HomeHunt luxury real estate platform",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
+    "server": "node server.js",
     "start": "node server.js"
   },
   "dependencies": {

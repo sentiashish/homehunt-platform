@@ -73,13 +73,20 @@ function buildLookupQuery(identifier) {
 }
 
 async function ensureDefaultProperties() {
-  const existingCount = await Property.countDocuments()
+  const existing = await Property.find({}, { legacyId: 1 }).lean()
+  const existingLegacyIds = new Set(existing.map((property) => property.legacyId).filter(Boolean))
 
-  if (existingCount > 0) {
-    return Property.find().sort({ createdAt: -1 })
+  const missingDefaults = defaultProperties.filter((property) => {
+    if (!property.legacyId) return false
+    return !existingLegacyIds.has(property.legacyId)
+  })
+
+  if (existing.length === 0) {
+    await Property.insertMany(defaultProperties.map((property) => buildPropertyPayload(property)))
+  } else if (missingDefaults.length > 0) {
+    await Property.insertMany(missingDefaults.map((property) => buildPropertyPayload(property)))
   }
 
-  await Property.insertMany(defaultProperties.map((property) => buildPropertyPayload(property)))
   return Property.find().sort({ createdAt: -1 })
 }
 

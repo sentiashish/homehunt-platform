@@ -4,7 +4,7 @@ const defaultContent = {
     subtitle: 'Discover landmark residences crafted for modern luxury and long-term value.',
   },
   overview:
-    'Megaplex Prime is a signature luxury real estate destination designed for discerning buyers who seek architecture, comfort, and prestige in one complete offering.',
+    'HomeHunt is a signature luxury real estate destination designed for discerning buyers who seek architecture, comfort, and prestige in one complete offering.',
   connectivity:
     'Strategically located with seamless access to BKC, Bandra-Worli Sea Link, Metro corridors, top schools, and major business districts across Mumbai.',
   amenities: [
@@ -22,7 +22,7 @@ const defaultContent = {
     },
   ],
   about:
-    'At Megaplex Prime, we blend timeless design with operational excellence to deliver homes that feel iconic from day one and valuable for generations.',
+    'At HomeHunt, we blend timeless design with operational excellence to deliver homes that feel iconic from day one and valuable for generations.',
   constructionUpdates: [
     { label: 'Civil Structure', value: '95% Complete' },
     { label: 'Facade Work', value: '82% Complete' },
